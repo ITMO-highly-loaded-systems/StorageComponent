@@ -21,12 +21,12 @@ public class KVPair {
     @Column(name = "value")
     private String value;
     public KVPair() { }
-    public KVPair(String key_, String value_) throws NullPointerException{
-        if (key_ == null) throw new NullPointerException();
-        if (value_ == null) throw new NullPointerException();
+    public KVPair(String key, String value) throws NullPointerException{
+        if (key == null) throw new NullPointerException();
+        if (value == null) throw new NullPointerException();
 
-        key = key_;
-        value = value_;
+        this.key = key;
+        this.value = value;
     }
 
 

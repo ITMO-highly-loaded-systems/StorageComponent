@@ -1,7 +1,7 @@
 package com.storage.exceptions;
 
 public class PairException extends Exception {
-    private PairException(String message) {
+    public PairException(String message) {
         super(message);
     }
 
