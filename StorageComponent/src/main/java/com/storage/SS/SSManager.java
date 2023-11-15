@@ -1,89 +1,86 @@
 package com.storage.SS;
 
 import com.storage.Entities.KVPair;
+import com.storage.service.SsService;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
 public class SSManager<K extends Comparable<K>, V> implements ISSManager<K, V> {
     private ArrayList<SSTable<K>> tables;
-//    private fs;
+    private final ISSTableNameGenerator nameGenerator;
+    private final SsService service;
+
+    public SSManager(SSTableNameGenerator nameGenerator, SsService service) {
+        this.nameGenerator = nameGenerator;
+        this.service = service;
+    }
 
     @Override
-    public void createTable(ArrayList<KVPair<K, V>> pairs) {
-        // fileNames.add(сгенерировать имя файла)
-//        for (var p:pairs) {
-//            var name = fs.write(fileNames.Last, p);// надо обработать внути запись в несуществующий файл(создать и писать) и переполнение файла (создать еще один, а потом вернуть лист из путей)
-//            if (fileNames.Last!=name){
-//              filenames.add(name)
-//            }
-//        }
-        // разделить на сегменты, заполнить mapper
-        // заархивировать сегменты, добавить инфу о размере сегментов в файл
+    public void createTable(ArrayList<KVPair<K, V>> pairs) throws IOException {
+        var fileName = nameGenerator.getName(tables.size() + 1);
+        tables.add(new SSTable<K>(fileName));
+        tables.get(tables.size() - 1).setMapper(service.<K, V>set(pairs), fileName); // доделать метод сервиса
     }
 
     @Override
     public V get(K key) {
-        KVPair<K, V> pair = null;
-        for (int i = tables.size() - 1; i >= 0; --i) {
-            var segmentsInfo = tables.get(i).FindSegments(key);
-            var size = segmentsInfo.end() - segmentsInfo.start();
-            if (size < 0) {
-                // разархивируем от старта до конца файла
-            } else {
-                // разархивируем от старта до энда
-            }
-            //// какой-то костыль, но я не смогла придумать что-то лучше, только если сразу хранить не начало, а начало + размер
-            // бин поиском ищем элемент. если нашли, return pair
+        var i = tables.size() - 1;
+        SSSegmentInfo segmentInfo = null;
+        while (i >= 0 && segmentInfo == null) {
+            segmentInfo = tables.get(i).FindSegments(key);
+            --i;
         }
-        return pair.getValue();
+        if (segmentInfo == null) return null;
+        return (V) service.<K, V>get(key, segmentInfo.offset()).getValue(); // очень плохо, надо исправить, не пойму что ему не нравится, если getValue и так возвращает V
     }
 
     @Override
     public void Merge() {
-        ArrayList<ArrayList<KVPair<K, V>>> tables = new ArrayList<>();
-        ArrayList<KVPair<K, V>> oldestTable = new ArrayList<>();
+//        ArrayList<ArrayList<KVPair<K, V>>> tables = new ArrayList<>();
+//        ArrayList<KVPair<K, V>> oldestTable = new ArrayList<>();
         // считать сначала первую таблицу из листа в олдест
         // считать остальные таблицы в лист tables
         // реверснуть этот лист (?)
 
-        var res1 = mergeArrays(tables);
-        var res = mergeArrays(res1, oldestTable);
+//        var res1 = mergeArrays(tables);
+//        var res = mergeArrays(res1, oldestTable);
         // создать таблицу по res
         // добавить в лист новую таблицу, остальное удалить
         // удалить файлы прошлых таблиц
     }
 
-    private ArrayList<KVPair<K, V>> mergeArrays(ArrayList<ArrayList<KVPair<K, V>>> tables) {
-        var tablesCount = tables.size();
-        var resultList = new ArrayList<KVPair<K, V>>();
-        var iterators = new int[tablesCount];
-        for (var i : iterators) {
-            i = 0;
-        }
-        KVPair<K, V> pairWithMinKey;
-        int index = -1;
-        while (true) {
-            pairWithMinKey = null;
-            index = -1;
-            for (int i = 0; i < tablesCount; ++i) {
-                var pair = tables.get(i).get(iterators[i]);
-                if (index < tables.get(i).size()) {
-                    while (resultList.size() != 0 && pair.getKey() == resultList.get(resultList.size() - 1).getKey()) {
-                        ++iterators[i];
-                    }
-                    if (pairWithMinKey == null || pair.getKey().compareTo(pairWithMinKey.getKey()) < 0) {
-                        pairWithMinKey = pair;
-                        index = i;
-                    }
-                }
-            }
-            if (index == -1) break;
-            resultList.add(pairWithMinKey);
-            ++iterators[index];
-        }
-        return resultList;
-    }
+//    private ArrayList<KVPair<K, V>> mergeArrays(ArrayList<ArrayList<KVPair<K, V>>> tables) {
+//        var tablesCount = tables.size();
+//        var resultList = new ArrayList<KVPair<K, V>>();
+//        var iterators = new int[tablesCount];
+//        for (var i : iterators) {
+//            i = 0;
+//        }
+//        KVPair<K, V> pairWithMinKey;
+//        int index = -1;
+//        while (true) {
+//            pairWithMinKey = null;
+//            index = -1;
+//            for (int i = 0; i < tablesCount; ++i) {
+//                var pair = tables.get(i).get(iterators[i]);
+//                if (index < tables.get(i).size()) {
+//                    while (resultList.size() != 0 && pair.getKey() == resultList.get(resultList.size() - 1).getKey()) {
+//                        ++iterators[i];
+//                    }
+//                    if (pairWithMinKey == null || pair.getKey().compareTo(pairWithMinKey.getKey()) < 0) {
+//                        pairWithMinKey = pair;
+//                        index = i;
+//                    }
+//                }
+//            }
+//            if (index == -1) break;
+//            resultList.add(pairWithMinKey);
+//            ++iterators[index];
+//        }
+//        return resultList;
+//    }
 
     private ArrayList<KVPair<K, V>> mergeArrays(ArrayList<KVPair<K, V>> l1, ArrayList<KVPair<K, V>> l2) {
         var list = new ArrayList<ArrayList<KVPair<K, V>>>();
@@ -92,7 +89,7 @@ public class SSManager<K extends Comparable<K>, V> implements ISSManager<K, V> {
         return mergeArrays(list);
     }
 
-    private ArrayList<KVPair<K, V>> newMerge(ArrayList<ArrayList<KVPair<K, V>>> tables) {
+    private ArrayList<KVPair<K, V>> mergeArrays(ArrayList<ArrayList<KVPair<K, V>>> tables) {
         var tablesCount = tables.size();
         var resultList = new ArrayList<KVPair<K, V>>();
         var queue = new PriorityQueue<DataForPriorityQueue<K, V>>();

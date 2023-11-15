@@ -2,14 +2,15 @@ package com.storage.MM;
 
 import com.storage.Entities.KVPair;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class MemTableDecorator<K extends Comparable<K>, V> implements IMemTable<K, V> {
 
-    private final MemTable<K, V> manager;
+    private final MemTable<K, V> manager; // переделать дерево так, чтобы хранились наши пары + переписать гет
     private final IWal wal;
 
-    public MemTableDecorator(MemTable<K, V> manager, IWal wal) {
+    public MemTableDecorator(MemTable<K, V> manager, IWal wal) throws IOException {
         this.wal = wal;
         this.manager = manager;
         for (KVPair<K, V> pair : wal.<K, V>getAll()) {
@@ -23,9 +24,9 @@ public class MemTableDecorator<K extends Comparable<K>, V> implements IMemTable<
     }
 
     @Override
-    public boolean set(KVPair<K, V> pair) {
+    public boolean set(KVPair<K, V> pair) throws IOException {
         var flag = manager.set(pair);
-        wal.write(pair);
+        wal.set(pair);
         return flag;
     }
 

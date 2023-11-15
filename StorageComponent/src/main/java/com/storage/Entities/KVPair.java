@@ -6,13 +6,27 @@ import lombok.Setter;
 import java.util.Objects;
 
 
-@Getter
-@Setter
+
 public class KVPair<K, V> {
 
-    private Integer id;
     public K key;
     private V value;
+
+    public K getKey() {
+        return key;
+    }
+
+    public void setKey(K key) {
+        this.key = key;
+    }
+
+    public V getValue() {
+        return value;
+    }
+
+    public void setValue(V value) {
+        this.value = value;
+    }
 
     public KVPair() {
     }

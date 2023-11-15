@@ -1,29 +1,26 @@
 package com.storage.SS;
 
-import com.storage.SS.SSMap;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SSTable<K extends Comparable<K>> {
-    private ArrayList<String> paths;
-    private ArrayList<SSMap<K>> mapper;
-
-    public ArrayList<String> getPaths() {
-        return paths;
+    public SSTable(String paths) {
+        this.path = paths;
     }
 
-    public SSSegmentsInfo FindSegments(K key) {
-        var i = LeftBinarySearch.search(mapper, key);
-        var end = 0;
-        if (i + 1 != mapper.size()) {
-            end = mapper.get(i + 1).getOffset();
-        }
+    private String path;
+    private HashMap<K, SSSegmentInfo> mapper;
 
-        return new SSSegmentsInfo(mapper.get(i).getOffset(), end);
+    public String getPath() {
+        return path;
     }
 
-//    public int FindSegmentsIndex(K key) {
-//        var index = LeftBinarySearch.search(mapper, key);
-//        return mapper.get(index).getOffset();
-//    }
+    public void setMapper(HashMap<K, SSSegmentInfo> mapper) {
+        this.mapper = mapper;
+    }
+
+    public SSSegmentInfo FindSegments(K key) {
+        return mapper.get(key);
+    }
+
 }

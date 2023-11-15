@@ -14,7 +14,7 @@ public class SsService {
     public FileSystem fs;
     public int blockSize;
 
-    public void set(ArrayList<KVPair> pairs) throws IOException {
+    public <K,V> void set(ArrayList<KVPair<K,V>> pairs) throws IOException {
         int count = 0;
         String str = "";
         for (KVPair pair:pairs) {
@@ -30,13 +30,13 @@ public class SsService {
             fs.writeWithCompression(str);
         }
     }
-    public void set(KVPair pair) throws IOException {
+    public <K,V> void set(KVPair<K,V> pair) throws IOException {
         String str = pair.getKey() + "," + pair.getValue() + ";";
         fs.write(str);
     }
 
-    public KVPair get(String key, int off) {
-        ArrayList<KVPair> list = new ArrayList<>();
+    public <K,V>KVPair get(K key, int off) {
+        ArrayList<KVPair<K,V>> list = new ArrayList<>();
 
         try {
             String str = fs.readCompressedBlock(off);
@@ -44,7 +44,7 @@ public class SsService {
             for (String pair : pairs) {
                 String[] values = pair.split(",");
                 if (values[0].equals(key)) {
-                    return new KVPair(values[0], values[1]);
+                    return new KVPair<K,V>((K)values[0], (V)values[1]); // так плохо делать, надо будет что-нибудь придумать
                 }
             }
             return null;
@@ -53,8 +53,8 @@ public class SsService {
         }
     }
 
-    public ArrayList<KVPair> getAll(int off) {
-        ArrayList<KVPair> list = new ArrayList<>();
+    public <K,V> ArrayList<KVPair<K,V>> getAll(int off) {
+        ArrayList<KVPair<K,V>> list = new ArrayList<>();
 
         try {
             String str = fs.readCompressedBlock(off);
