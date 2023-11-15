@@ -1,13 +1,14 @@
 package com.storage.service;
 
 import com.storage.Entities.KVPair;
+import com.storage.MM.IWal;
 import lombok.AllArgsConstructor;
 
 import java.io.*;
 import java.util.ArrayList;
 
 @AllArgsConstructor
-public class WAL {
+public class WAL implements IWal {
     public File file;
 
     public <K, V> void write(KVPair<K, V> pair) {
@@ -31,7 +32,7 @@ public class WAL {
             for (String pair : pairs) {
                 String[] values = pair.split(",");
                 if (values[0].equals(key)) {
-                    return new KVPair<K, V>(values[0], values[1]);
+                    return new KVPair<K, V>((K) values[0], (V) values[1]); // так делать плохо
                 }
             }
             return null;
@@ -51,9 +52,9 @@ public class WAL {
                 String[] values = pair.split(",");
 
                 if (values.length >= 2) {
-                    K key = values[0];
-                    V value = values[1];
-                    list.add(new KVPair<K, V>(key, value));
+                    K key = (K) values[0]; // так делать плохо
+                    V value = (V) values[1]; // так делать плохо
+                    list.add(new KVPair<>(key, value));
                 }
             }
             return list;

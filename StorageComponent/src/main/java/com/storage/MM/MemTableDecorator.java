@@ -7,22 +7,14 @@ import java.util.ArrayList;
 public class MemTableDecorator<K extends Comparable<K>, V> implements IMemTable<K, V> {
 
     private final MemTable<K, V> manager;
-    private final IWal logger;
+    private final IWal wal;
 
-    public MemTableDecorator(MemTable<K, V> manager, IWal logger, String logFile) {
-        this.logger = logger;
+    public MemTableDecorator(MemTable<K, V> manager, IWal wal) {
+        this.wal = wal;
         this.manager = manager;
-//        log = парсинг файла(logFile)
-//        for (var p: log) {
-//            manager.set(p)
-//        }
-    }
-
-
-
-    public MemTableDecorator(MemTable<K, V> manager, IWal logger) {
-        this.manager = manager;
-        this.logger = logger;
+        for (KVPair<K, V> pair : wal.<K, V>getAll()) {
+            manager.set(pair);
+        }
     }
 
     @Override
@@ -33,13 +25,13 @@ public class MemTableDecorator<K extends Comparable<K>, V> implements IMemTable<
     @Override
     public boolean set(KVPair<K, V> pair) {
         var flag = manager.set(pair);
-        logger.log(pair);
+        wal.write(pair);
         return flag;
     }
 
     @Override
     public void clear() {
-        logger.clear();
+        wal.clear();
         manager.clear();
     }
 
