@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class WAL {
     public File file;
 
-    public void write(KVPair pair) {
+    public <K, V> void write(KVPair<K, V> pair) {
         FileWriter writer = null;
         try {
             writer = new FileWriter(file, true);
@@ -21,8 +21,8 @@ public class WAL {
         }
     }
 
-    public KVPair get(String key) {
-        ArrayList<KVPair> list = new ArrayList<>();
+    public <K, V> KVPair<K, V> get(K key) {
+        ArrayList<KVPair<K, V>> list = new ArrayList<>();
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -31,7 +31,7 @@ public class WAL {
             for (String pair : pairs) {
                 String[] values = pair.split(",");
                 if (values[0].equals(key)) {
-                    return new KVPair(values[0], values[1]);
+                    return new KVPair<K, V>(values[0], values[1]);
                 }
             }
             return null;
@@ -40,8 +40,8 @@ public class WAL {
         }
     }
 
-    public ArrayList<KVPair> getAll() {
-        ArrayList<KVPair> list = new ArrayList<>();
+    public <K, V> ArrayList<KVPair<K, V>> getAll() {
+        ArrayList<KVPair<K, V>> list = new ArrayList<>();
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file.getPath()));
@@ -51,9 +51,9 @@ public class WAL {
                 String[] values = pair.split(",");
 
                 if (values.length >= 2) {
-                    String key = values[0];
-                    String value = values[1];
-                    list.add(new KVPair(key, value));
+                    K key = values[0];
+                    V value = values[1];
+                    list.add(new KVPair<K, V>(key, value));
                 }
             }
             return list;
@@ -62,7 +62,7 @@ public class WAL {
         }
     }
 
-    public void clear(){
+    public void clear() {
         FileWriter writer = null;
         try {
             writer = new FileWriter(file, false);

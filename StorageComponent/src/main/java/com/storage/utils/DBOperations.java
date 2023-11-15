@@ -1,7 +1,9 @@
 package com.storage.utils;
 
 
-public interface DBOperations<T> {
-    public void set(T object);
-    public T get(String key);
+import com.storage.Entities.KVPair;
+
+public interface DBOperations<K,V> {
+    public void set(KVPair<K,V> pair);
+    public V get(K key);
 }
