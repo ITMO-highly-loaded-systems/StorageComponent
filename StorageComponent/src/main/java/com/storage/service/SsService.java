@@ -1,10 +1,10 @@
 package com.storage.service;
 
 import com.storage.Entities.KVPair;
+import com.storage.FileSystem.FileSystem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -19,14 +19,16 @@ public class SsService {
         String str = "";
         for (KVPair pair:pairs) {
             if(count == blockSize){
-                fs.write(str);
+                fs.writeWithCompression(str);
                 str = "";
                 count = 0;
             }
             count++;
             str = str.concat(pair.getKey() + "," + pair.getValue() + ";");
         }
-        fs.write(str);
+        if(!str.equals("")) {
+            fs.writeWithCompression(str);
+        }
     }
     public void set(KVPair pair) throws IOException {
         String str = pair.getKey() + "," + pair.getValue() + ";";
@@ -37,7 +39,7 @@ public class SsService {
         ArrayList<KVPair> list = new ArrayList<>();
 
         try {
-            String str = fs.read(off);
+            String str = fs.readCompressedBlock(off);
             String[] pairs = str.split(";");
             for (String pair : pairs) {
                 String[] values = pair.split(",");
@@ -55,7 +57,7 @@ public class SsService {
         ArrayList<KVPair> list = new ArrayList<>();
 
         try {
-            String str = fs.read(off);
+            String str = fs.readCompressedBlock(off);
             String[] pairs = str.split(";");
             for (String pair : pairs) {
                 String[] values = pair.split(",");

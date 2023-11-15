@@ -1,26 +1,37 @@
-package com.storage.service;
+package com.storage.FileSystem;
 
-import com.storage.Entities.KVPair;
+import com.storage.service.Compressor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.*;
-import java.util.ArrayList;
 
 @Getter
 @AllArgsConstructor
-public class FileSystem{
+public class DiskFileSystem implements FileSystem{
     public File file;
     public Compressor compressor;
 
     public void write(String str) throws IOException {
+        FileWriter writer = null;
+        writer = new FileWriter(file, true);
+        writer.write(str);
+        writer.flush();
+    }
+
+    public void writeWithCompression(String str) throws IOException {
         byte[] compressedData = compressor.compress(str);
         FileOutputStream fos = new FileOutputStream(file, true);
         fos.write(Integer.toString(compressedData.length).getBytes());
         fos.write(compressedData);
     }
 
-    public String read(int off) throws IOException {
+    public String read() throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        return reader.readLine();
+    }
+
+    public String readCompressedBlock(int off) throws IOException {
         FileInputStream fis = new FileInputStream(file);
         fis.skip(off);
         byte[] b = new byte[2];
