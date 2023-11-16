@@ -6,27 +6,12 @@ import lombok.Setter;
 import java.util.Objects;
 
 
-
-public class KVPair<K, V> {
+@Getter
+@Setter
+public class KVPair<K extends Comparable<K>, V>  implements Comparable<KVPair<K,V>>{
 
     public K key;
     private V value;
-
-    public K getKey() {
-        return key;
-    }
-
-    public void setKey(K key) {
-        this.key = key;
-    }
-
-    public V getValue() {
-        return value;
-    }
-
-    public void setValue(V value) {
-        this.value = value;
-    }
 
     public KVPair() {
     }
@@ -52,4 +37,8 @@ public class KVPair<K, V> {
         return Objects.hash(key);
     }
 
+    @Override
+    public int compareTo(KVPair<K,V> o) {
+        return key.compareTo(o.getKey());
+    }
 }

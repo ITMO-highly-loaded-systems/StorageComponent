@@ -1,6 +1,8 @@
 package com.storage.MM;
 
 import com.storage.Entities.KVPair;
+import com.storage.MM.Interfaces.IMemTable;
+import com.storage.MM.Interfaces.IWal;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,18 +1,17 @@
 package com.storage.SS;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SSTable<K extends Comparable<K>> {
     public SSTable(String paths) {
-        this.path = paths;
+        this.fileName = paths;
     }
 
-    private String path;
+    private final String fileName;
     private HashMap<K, SSSegmentInfo> mapper;
 
-    public String getPath() {
-        return path;
+    public String getFileName() {
+        return fileName;
     }
 
     public void setMapper(HashMap<K, SSSegmentInfo> mapper) {

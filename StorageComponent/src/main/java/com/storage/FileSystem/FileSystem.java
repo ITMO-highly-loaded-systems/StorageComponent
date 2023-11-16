@@ -1,9 +1,6 @@
 package com.storage.FileSystem;
-
-import com.storage.service.SSSegmentInfo;
-
 import java.io.*;
-import java.util.HashMap;
+import com.storage.SS.SSSegmentInfo;
 
 public interface FileSystem {
     void write(String str, String FileName) throws IOException;

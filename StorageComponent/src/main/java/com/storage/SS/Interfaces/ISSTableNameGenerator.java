@@ -1,4 +1,4 @@
-package com.storage.SS;
+package com.storage.SS.Interfaces;
 
 public interface ISSTableNameGenerator {
 

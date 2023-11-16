@@ -1,9 +1,15 @@
 package com.storage.SS;
 
+import com.storage.SS.Interfaces.ISSTableNameGenerator;
+
 import java.util.HashMap;
 
-public class SSTableNameGenerator implements ISSTableNameGenerator{
-    private HashMap<Integer, Integer> filesCount;
+public class SSTableNameGenerator implements ISSTableNameGenerator {
+    private final HashMap<Integer, Integer> filesCount;
+
+    public SSTableNameGenerator() {
+        filesCount = new HashMap<>();
+    }
 
     @Override
     public String getName(int tableNumber)

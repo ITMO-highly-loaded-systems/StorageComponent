@@ -1,6 +1,7 @@
 package com.storage.MM;
 
 import com.storage.Entities.KVPair;
+import com.storage.MM.Interfaces.IMemTable;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -9,10 +10,12 @@ import java.util.TreeMap;
 public class MemTable<K extends Comparable<K>, V> implements IMemTable<K, V> {
 
     private final TreeMap<K, V> tree;
+//    private final TreeSet<KVPair<K,V>> tree;
     private final int maxSize;
     public MemTable(int maxSize) {
         this.maxSize = maxSize;
         tree = new TreeMap<>();
+//        tree = new TreeSet<>();
     }
 
     @Override
