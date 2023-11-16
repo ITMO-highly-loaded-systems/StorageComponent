@@ -1,15 +1,18 @@
 package com.storage.FileSystem;
 
+import com.storage.service.SSSegmentInfo;
+
 import java.io.*;
+import java.util.HashMap;
 
 public interface FileSystem {
-    void write(String str) throws IOException;
+    void write(String str, String FileName) throws IOException;
 
-    void writeWithCompression(String str) throws IOException;
+    SSSegmentInfo writeWithCompression(String str, String FileName) throws IOException;
 
-    String read() throws IOException;
+    String read(String FileName) throws IOException;
 
-    String readCompressedBlock(int off) throws IOException;
+    String readCompressedBlock(int off, String FileName) throws IOException;
 
-    void clearFile();
+    void clearFile(String FileName);
 }

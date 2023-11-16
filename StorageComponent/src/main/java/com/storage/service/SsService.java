@@ -7,42 +7,49 @@ import lombok.Getter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 @Getter
 @AllArgsConstructor
 public class SsService {
-    public FileSystem fs;
-    public int blockSize;
+    private FileSystem fs;
+    private int blockSize;
+    private String pairSep;
+    private String pairEnd;
 
-    public <K,V> void set(ArrayList<KVPair<K,V>> pairs) throws IOException {
-        int count = 0;
+    public HashMap<String, SSSegmentInfo> set(ArrayList<KVPair> pairs, String FileName) throws IOException {
+        HashMap<String, SSSegmentInfo> map = new HashMap<>();
         String str = "";
+        ArrayList<KVPair> block = new ArrayList<>();
         for (KVPair pair:pairs) {
-            if(count == blockSize){
-                fs.writeWithCompression(str);
+            if(block.size() == blockSize){
+                SSSegmentInfo segmentInfo = fs.writeWithCompression(str, FileName);
+                map.put(block.get(0).getKey(), segmentInfo);
                 str = "";
-                count = 0;
+                block.clear();
             }
-            count++;
-            str = str.concat(pair.getKey() + "," + pair.getValue() + ";");
+            block.add(pair);
+            str = str.concat(pair.getKey() + pairSep + pair.getValue() + pairEnd);
         }
-        if(!str.equals("")) {
-            fs.writeWithCompression(str);
+        if(!str.isEmpty()) {
+            SSSegmentInfo segmentInfo = fs.writeWithCompression(str, FileName);
+            map.put(block.get(0).getKey(), segmentInfo);
         }
+        return map;
     }
-    public <K,V> void set(KVPair<K,V> pair) throws IOException {
-        String str = pair.getKey() + "," + pair.getValue() + ";";
-        fs.write(str);
+    public void set(KVPair pair, String FileName) throws IOException {
+        String str = pair.getKey() + pairSep + pair.getValue() + pairEnd;
+        fs.writeWithCompression(str, FileName);
     }
 
-    public <K,V>KVPair get(K key, int off) {
-        ArrayList<KVPair<K,V>> list = new ArrayList<>();
+    public KVPair get(String key, int off, String FileName) {
+        ArrayList<KVPair> list = new ArrayList<>();
 
         try {
-            String str = fs.readCompressedBlock(off);
-            String[] pairs = str.split(";");
+            String str = fs.readCompressedBlock(off, FileName);
+            String[] pairs = str.split(pairEnd);
             for (String pair : pairs) {
-                String[] values = pair.split(",");
+                String[] values = pair.split(pairSep);
                 if (values[0].equals(key)) {
                     return new KVPair<K,V>((K)values[0], (V)values[1]); // так плохо делать, надо будет что-нибудь придумать
                 }
@@ -53,14 +60,16 @@ public class SsService {
         }
     }
 
+    public ArrayList<KVPair> getAll(int off, String FileName) {
+        ArrayList<KVPair> list = new ArrayList<>();
     public <K,V> ArrayList<KVPair<K,V>> getAll(int off) {
         ArrayList<KVPair<K,V>> list = new ArrayList<>();
 
         try {
-            String str = fs.readCompressedBlock(off);
-            String[] pairs = str.split(";");
+            String str = fs.readCompressedBlock(off, FileName);
+            String[] pairs = str.split(pairEnd);
             for (String pair : pairs) {
-                String[] values = pair.split(",");
+                String[] values = pair.split(pairSep);
 
                 if (values.length >= 2) {
                     String key = values[0];
@@ -72,5 +81,9 @@ public class SsService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void clear(String FileName){
+        fs.clearFile(FileName);
     }
 }
