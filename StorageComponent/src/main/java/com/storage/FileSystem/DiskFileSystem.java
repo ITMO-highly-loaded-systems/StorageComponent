@@ -1,7 +1,7 @@
 package com.storage.FileSystem;
 
-import com.storage.service.Compressor;
-import com.storage.service.SSSegmentInfo;
+import com.storage.SS.SSSegmentInfo;
+import com.storage.service.Interfaces.Compressor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -15,7 +15,7 @@ public class DiskFileSystem implements FileSystem{
 
     public void write(String str, String FileName) throws IOException {
         File file = new File(directory, FileName);
-        FileWriter writer = null;
+        FileWriter writer;
         writer = new FileWriter(file, true);
         writer.write(str);
         writer.flush();
