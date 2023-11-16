@@ -3,6 +3,7 @@ package com.storage.service;
 import com.storage.Entities.KVPair;
 import com.storage.FileSystem.FileSystem;
 import com.storage.SS.SSSegmentInfo;
+import com.storage.service.Interfaces.ISSService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,7 +13,7 @@ import java.util.HashMap;
 
 @Getter
 @AllArgsConstructor
-public class SsService implements ISSService{
+public class SsService implements ISSService {
     private FileSystem fs;
     private int blockSize;
     private String pairSep;

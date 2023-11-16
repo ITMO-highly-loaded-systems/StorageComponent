@@ -10,12 +10,10 @@ import java.util.TreeMap;
 public class MemTable<K extends Comparable<K>, V> implements IMemTable<K, V> {
 
     private final TreeMap<K, V> tree;
-//    private final TreeSet<KVPair<K,V>> tree;
     private final int maxSize;
     public MemTable(int maxSize) {
         this.maxSize = maxSize;
         tree = new TreeMap<>();
-//        tree = new TreeSet<>();
     }
 
     @Override

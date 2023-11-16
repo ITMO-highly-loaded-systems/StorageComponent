@@ -1,4 +1,4 @@
-package com.storage.service;
+package com.storage.service.Interfaces;
 
 import com.storage.Entities.KVPair;
 import com.storage.SS.SSSegmentInfo;

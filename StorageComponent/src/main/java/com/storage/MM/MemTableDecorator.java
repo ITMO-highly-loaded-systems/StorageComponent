@@ -2,14 +2,14 @@ package com.storage.MM;
 
 import com.storage.Entities.KVPair;
 import com.storage.MM.Interfaces.IMemTable;
-import com.storage.MM.Interfaces.IWal;
+import com.storage.service.Interfaces.IWal;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class MemTableDecorator<K extends Comparable<K>, V> implements IMemTable<K, V> {
 
-    private final MemTable<K, V> manager; // переделать дерево так, чтобы хранились наши пары + переписать гет
+    private final MemTable<K, V> manager;
     private final IWal wal;
 
     public MemTableDecorator(MemTable<K, V> manager, IWal wal) throws IOException {

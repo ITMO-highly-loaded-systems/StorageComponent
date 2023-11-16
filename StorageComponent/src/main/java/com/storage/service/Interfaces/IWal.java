@@ -1,4 +1,4 @@
-package com.storage.MM.Interfaces;
+package com.storage.service.Interfaces;
 
 import com.storage.Entities.KVPair;
 

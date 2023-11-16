@@ -1,11 +1,13 @@
 package com.storage.service;
 
+import com.storage.service.Interfaces.Compressor;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class GzipCompressor implements Compressor{
+public class GzipCompressor implements Compressor {
     public byte[] compress(String str) throws IOException {
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

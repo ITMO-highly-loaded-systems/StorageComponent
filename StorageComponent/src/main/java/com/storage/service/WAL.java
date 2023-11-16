@@ -1,8 +1,8 @@
 package com.storage.service;
 
 import com.storage.Entities.KVPair;
-import com.storage.MM.Interfaces.IWal;
 import com.storage.FileSystem.FileSystem;
+import com.storage.service.Interfaces.IWal;
 import lombok.AllArgsConstructor;
 
 import java.io.*;

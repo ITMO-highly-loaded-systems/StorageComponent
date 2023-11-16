@@ -1,7 +1,7 @@
 package com.storage.FileSystem;
 
 import com.storage.SS.SSSegmentInfo;
-import com.storage.service.Compressor;
+import com.storage.service.Interfaces.Compressor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
