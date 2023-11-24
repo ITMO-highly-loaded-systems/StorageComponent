@@ -9,7 +9,7 @@ import java.io.*;
 
 @Getter
 @AllArgsConstructor
-public class DiskFileSystem implements FileSystem{
+public class DiskFileSystem implements FileSystem {
     private File directory;
     private Compressor compressor;
 
@@ -34,6 +34,7 @@ public class DiskFileSystem implements FileSystem{
 
     public String read(String FileName) throws IOException {
         File file = new File(directory, FileName);
+        if (!file.exists()) return "";
         BufferedReader reader = new BufferedReader(new FileReader(file));
         return reader.readLine();
     }
@@ -51,7 +52,7 @@ public class DiskFileSystem implements FileSystem{
         return str;
     }
 
-    public void clearFile(String FileName){
+    public void clearFile(String FileName) {
         File file = new File(directory, FileName);
         FileWriter writer = null;
         try {

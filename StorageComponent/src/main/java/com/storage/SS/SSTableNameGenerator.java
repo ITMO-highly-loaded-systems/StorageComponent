@@ -20,6 +20,6 @@ public class SSTableNameGenerator implements ISSTableNameGenerator {
             filesCount.put(tableNumber, 1);
             count = 0;
         }
-        return "SSTable"+tableNumber+"."+count;
+        return "SSTable"+tableNumber+"."+count+".txt";
     }
 }

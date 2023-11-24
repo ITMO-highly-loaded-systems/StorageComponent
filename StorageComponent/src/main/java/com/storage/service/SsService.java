@@ -2,6 +2,7 @@ package com.storage.service;
 
 import com.storage.Entities.KVPair;
 import com.storage.FileSystem.FileSystem;
+import com.storage.SS.SSMap;
 import com.storage.SS.SSSegmentInfo;
 import com.storage.service.Interfaces.ISSService;
 import lombok.AllArgsConstructor;
@@ -20,14 +21,14 @@ public class SsService implements ISSService {
     private String pairEnd;
 
     @Override
-    public <K extends Comparable<K>,V> HashMap<K, SSSegmentInfo> set(ArrayList<KVPair<K, V>> pairs, String FileName) throws IOException {
-        HashMap<K, SSSegmentInfo> map = new HashMap<>();
+    public <K extends Comparable<K>,V> ArrayList<SSMap<K>> set(ArrayList<KVPair<K, V>> pairs, String FileName) throws IOException {
+        var map = new ArrayList<SSMap<K>>();
         String str = "";
         ArrayList<KVPair<K,V>> block = new ArrayList<>();
         for (KVPair<K,V> pair:pairs) {
             if(block.size() == blockSize){
                 var segmentInfo = fs.writeWithCompression(str, FileName);
-                map.put(block.get(0).getKey(), segmentInfo);
+                map.add(new SSMap<K>(block.get(0).getKey(), segmentInfo));
                 str = "";
                 block.clear();
             }
@@ -36,7 +37,7 @@ public class SsService implements ISSService {
         }
         if(!str.isEmpty()) {
             SSSegmentInfo segmentInfo = fs.writeWithCompression(str, FileName);
-            map.put(block.get(0).getKey(), segmentInfo);
+            map.add(new SSMap<K>(block.get(0).getKey(), segmentInfo));
         }
         return map;
     }

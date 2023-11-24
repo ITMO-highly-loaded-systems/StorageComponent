@@ -1,17 +1,19 @@
 package com.storage;
 
+import com.storage.MM.Interfaces.IMemTable;
 import com.storage.MM.MemTable;
 import com.storage.SS.SSManager;
 import com.storage.utils.DBOperations;
 import com.storage.Entities.KVPair;
+import com.storage.utils.IMerger;
 
 import java.io.IOException;
 
-public class LSM<K extends Comparable<K>, V> implements DBOperations<K,V> {
-    private final MemTable<K, V> mmManager;
+public class LSM<K extends Comparable<K>, V> implements DBOperations<K, V>, IMerger {
+    private final IMemTable<K, V> mmManager;
     private final SSManager<K, V> ssManager;
 
-    public LSM(MemTable<K, V> mmManager, SSManager<K, V> ssManager) {
+    public LSM(IMemTable<K, V> mmManager, SSManager<K, V> ssManager) {
         this.mmManager = mmManager;
         this.ssManager = ssManager;
     }
@@ -31,5 +33,11 @@ public class LSM<K extends Comparable<K>, V> implements DBOperations<K,V> {
             mmManager.clear();
             mmManager.set(pair);
         }
+    }
+
+
+    @Override
+    public void merge() throws IOException {
+        ssManager.merge();
     }
 }

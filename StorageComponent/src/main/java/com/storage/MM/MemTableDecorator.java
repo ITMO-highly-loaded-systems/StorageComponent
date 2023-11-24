@@ -9,10 +9,10 @@ import java.util.ArrayList;
 
 public class MemTableDecorator<K extends Comparable<K>, V> implements IMemTable<K, V> {
 
-    private final MemTable<K, V> manager;
+    private final IMemTable<K, V> manager;
     private final IWal wal;
 
-    public MemTableDecorator(MemTable<K, V> manager, IWal wal) throws IOException {
+    public MemTableDecorator(IMemTable<K, V> manager, IWal wal) throws IOException {
         this.wal = wal;
         this.manager = manager;
         for (KVPair<K, V> pair : wal.<K, V>getAll()) {
