@@ -21,21 +21,6 @@ public class WAL implements IWal {
         fs.write(str, fileName);
     }
 
-
-    public <K extends Comparable<K>, V> KVPair<K, V> get(String key) throws IOException {
-        ArrayList<KVPair> list = new ArrayList<>();
-        String line = fs.read(fileName);
-        String[] pairs = line.split(pairEnd);
-        for (String pair : pairs) {
-            String[] values = pair.split(pairSep);
-            if (values[0].equals(key)) {
-                return new KVPair(values[0], values[1]);
-            }
-        }
-
-        return null;
-    }
-
     @Override
     public <K extends Comparable<K>, V> ArrayList<KVPair<K, V>> getAll() throws IOException {
         ArrayList<KVPair<K, V>> list = new ArrayList<>();

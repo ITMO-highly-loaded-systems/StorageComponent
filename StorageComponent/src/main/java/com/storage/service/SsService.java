@@ -12,21 +12,29 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 @Getter
-@AllArgsConstructor
 public class SsService implements ISSService {
     private FileSystem fs;
     private int blockSize;
     private String pairSep;
     private String pairEnd;
+    private int bitCount;
+
+    public SsService(FileSystem fs, int blockSize, String pairSep, String pairEnd) {
+        this.fs = fs;
+        this.blockSize = blockSize;
+        this.pairSep = pairSep;
+        this.pairEnd = pairEnd;
+        this.bitCount = Integer.toString(blockSize).length() + 1;
+    }
 
     @Override
-    public <K extends Comparable<K>,V> ArrayList<SSMap<K>> set(ArrayList<KVPair<K, V>> pairs, String FileName) throws IOException {
+    public <K extends Comparable<K>,V> ArrayList<SSMap<K>> set(ArrayList<KVPair<K, V>> pairs, String fileName) throws IOException {
         var map = new ArrayList<SSMap<K>>();
         String str = "";
         ArrayList<KVPair<K,V>> block = new ArrayList<>();
         for (KVPair<K,V> pair:pairs) {
             if(block.size() == blockSize){
-                var segmentInfo = fs.writeWithCompression(str, FileName);
+                var segmentInfo = fs.writeWithCompression(str, bitCount, fileName);
                 map.add(new SSMap<K>(block.get(0).getKey(), segmentInfo));
                 str = "";
                 block.clear();
@@ -35,20 +43,16 @@ public class SsService implements ISSService {
             str = str.concat(pair.getKey() + pairSep + pair.getValue() + pairEnd);
         }
         if(!str.isEmpty()) {
-            SSSegmentInfo segmentInfo = fs.writeWithCompression(str, FileName);
+            SSSegmentInfo segmentInfo = fs.writeWithCompression(str, bitCount, fileName);
             map.add(new SSMap<K>(block.get(0).getKey(), segmentInfo));
         }
         return map;
     }
-    public <K extends Comparable<K>,V> void set(KVPair<K,V> pair, String FileName) throws IOException {
-        String str = pair.getKey() + pairSep + pair.getValue() + pairEnd;
-        fs.writeWithCompression(str, FileName);
-    }
 
     @Override
-    public <K extends Comparable<K>,V> KVPair<K,V> get(K key, int off, String FileName) {
+    public <K extends Comparable<K>,V> KVPair<K,V> get(K key, int off, String fileName) {
         try {
-            String str = fs.readCompressedBlock(off, FileName);
+            String str = fs.readCompressedBlock(off, bitCount, fileName);
             String[] pairs = str.split(pairEnd);
             for (String pair : pairs) {
                 String[] values = pair.split(pairSep);
@@ -63,21 +67,22 @@ public class SsService implements ISSService {
     }
 
     @Override
-    public <K extends Comparable<K>,V> ArrayList<KVPair<K,V>> getAll(String FileName) {
-        ArrayList<KVPair<K,V>> list = new ArrayList<>();
-        var off = 0;
-
+    public <K extends Comparable<K>, V> ArrayList<KVPair<K, V>> getAll(String fileName) {
+        int off = 0;
+        var list = new ArrayList<KVPair<K, V>>();
         try {
-            String str = fs.readCompressedBlock(off, FileName);
-            String[] pairs = str.split(pairEnd);
-            for (String pair : pairs) { // этот кусок кода есть и в wal, надо вынести
-                String[] values = pair.split(pairSep);
-
-                if (values.length >= 2) {
-                    K key = (K)values[0]; // так плохо делать, надо будет что-нибудь придумать
-                    V value = (V)values[1]; // так плохо делать, надо будет что-нибудь придумать
-                    list.add(new KVPair<K,V>(key, value));
+            while(true){
+                int size = fs.readSegmentSize(off, bitCount, fileName);
+                if (size == 0){
+                    break;
                 }
+                String str = fs.readCompressedBlock(off, bitCount, fileName);
+                String[] pairs = str.split(pairEnd);
+                for (String pair : pairs) {
+                    String[] values = pair.split(pairSep);
+                    list.add(new KVPair<K,V>((K) values[0], (V) values[1]));
+                }
+                off += size + bitCount;
             }
             return list;
         } catch (IOException e) {
@@ -86,21 +91,21 @@ public class SsService implements ISSService {
     }
 
     @Override
-    public <K extends Comparable<K>,V> ArrayList<SSMap<K>> restoreSSMap(String FileName) {
+    public <K extends Comparable<K>,V> ArrayList<SSMap<K>> restoreSSMap(String fileName) {
         int off = 0;
         var map = new ArrayList<SSMap<K>>();
         try {
             while(true){
-                int size = fs.readSegmentSize(off, FileName);
+                int size = fs.readSegmentSize(off, bitCount, fileName);
                 if (size == 0){
                     break;
                 }
-                String str = fs.readCompressedBlock(off, FileName);
+                String str = fs.readCompressedBlock(off, bitCount, fileName);
                 String[] pairs = str.split(pairEnd);
                 String[] firstPair = pairs[0].split(pairSep);
                 K key = (K)firstPair[0];
                 map.add(new SSMap<K>(key, new SSSegmentInfo(off, size)));
-                off += size + (int)Math.log10(size) + 1;
+                off += size + bitCount;
             }
             return map;
         } catch (IOException e) {
@@ -110,7 +115,7 @@ public class SsService implements ISSService {
 
 
     @Override
-    public void clear(String FileName){
-        fs.clearFile(FileName);
+    public void clear(String fileName){
+        fs.clearFile(fileName);
     }
 }

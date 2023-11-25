@@ -5,12 +5,13 @@ import com.storage.SS.SSSegmentInfo;
 public interface FileSystem {
     void write(String str, String FileName) throws IOException;
 
-    SSSegmentInfo writeWithCompression(String str, String FileName) throws IOException;
+    SSSegmentInfo writeWithCompression(String str, int bitCount, String fileName) throws IOException;
 
     String read(String FileName) throws IOException;
 
-    String readCompressedBlock(int off, String FileName) throws IOException;
-    int readSegmentSize(int off, String FileName) throws IOException;
+    String readCompressedBlock(int off, int bitCount, String fileName) throws IOException;
+
+    int readSegmentSize(int off, int bitCount, String FileName) throws IOException;
 
     void clearFile(String FileName);
 }

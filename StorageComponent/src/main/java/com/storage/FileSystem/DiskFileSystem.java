@@ -13,6 +13,7 @@ public class DiskFileSystem implements FileSystem {
     private File directory;
     private Compressor compressor;
 
+    @Override
     public void write(String str, String fileName) throws IOException {
         File file = new File(directory, fileName);
         FileWriter writer;
@@ -22,18 +23,22 @@ public class DiskFileSystem implements FileSystem {
         writer.close();
     }
 
-    public SSSegmentInfo writeWithCompression(String str, String fileName) throws IOException {
+    @Override
+
+    public SSSegmentInfo writeWithCompression(String str, int bitCount, String fileName) throws IOException {
         File file = new File(directory, fileName);
         int off = (int) file.length();
         byte[] compressedData = compressor.compress(str);
         FileOutputStream fos = new FileOutputStream(file, true);
         int size = compressedData.length;
-        fos.write(Integer.toString(size).getBytes());
+        str = "0".repeat(bitCount-Integer.toString(size).length()) + size;
+        fos.write(str.getBytes());
         fos.write(compressedData);
         fos.close();
         return new SSSegmentInfo(off, size);
     }
 
+    @Override
     public String read(String fileName) throws IOException {
         File file = new File(directory, fileName);
         if (!file.exists()) return "";
@@ -41,12 +46,13 @@ public class DiskFileSystem implements FileSystem {
         return reader.readLine();
     }
 
-    public String readCompressedBlock(int off, String fileName) throws IOException {
+    @Override
+    public String readCompressedBlock(int off, int bitCount, String fileName) throws IOException {
         File file = new File(directory, fileName);
         FileInputStream fis = new FileInputStream(file);
         fis.skip(off);
-        byte[] b = new byte[2];
-        fis.read(b, 0, 2);
+        byte[] b = new byte[bitCount];
+        fis.read(b, 0, bitCount);
         int len = Integer.parseInt(new String(b));
         byte[] compressedData = new byte[len];
         fis.read(compressedData, 0, len);
@@ -55,20 +61,22 @@ public class DiskFileSystem implements FileSystem {
         return str;
     }
 
-    public int readSegmentSize(int off, String fileName) throws IOException{
+    @Override
+    public int readSegmentSize(int off, int bitCount, String fileName) throws IOException{
         File file = new File(directory, fileName);
         if(file.length() <= off) {
             return 0;
         }
         FileInputStream fis = new FileInputStream(file);
         fis.skip(off);
-        byte[] b = new byte[2];
-        fis.read(b, 0, 2);
+        byte[] b = new byte[bitCount];
+        fis.read(b, 0, bitCount);
         int len = Integer.parseInt(new String(b));
         fis.close();
         return len;
     }
 
+    @Override
     public void clearFile(String fileName){
         File file = new File(directory, fileName);
         FileWriter writer = null;
