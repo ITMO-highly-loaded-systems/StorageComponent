@@ -10,7 +10,6 @@ import lombok.Getter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 @Getter
 @AllArgsConstructor
@@ -85,6 +84,30 @@ public class SsService implements ISSService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public <K extends Comparable<K>,V> ArrayList<SSMap<K>> restoreSSMap(String FileName) {
+        int off = 0;
+        var map = new ArrayList<SSMap<K>>();
+        try {
+            while(true){
+                int size = fs.readSegmentSize(off, FileName);
+                if (size == 0){
+                    break;
+                }
+                String str = fs.readCompressedBlock(off, FileName);
+                String[] pairs = str.split(pairEnd);
+                String[] firstPair = pairs[0].split(pairSep);
+                K key = (K)firstPair[0];
+                map.add(new SSMap<K>(key, new SSSegmentInfo(off, size)));
+                off += size + (int)Math.log10(size) + 1;
+            }
+            return map;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @Override
     public void clear(String FileName){

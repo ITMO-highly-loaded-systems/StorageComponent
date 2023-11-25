@@ -15,5 +15,7 @@ public interface ISSService {
 
     <K extends Comparable<K>,V> ArrayList<KVPair<K,V>> getAll(String FileName);
 
+    <K extends Comparable<K>,V> ArrayList<SSMap<K>> restoreSSMap(String FileName);
+
     void clear(String FileName);
 }

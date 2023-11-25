@@ -10,6 +10,7 @@ public interface FileSystem {
     String read(String FileName) throws IOException;
 
     String readCompressedBlock(int off, String FileName) throws IOException;
+    int readSegmentSize(int off, String FileName) throws IOException;
 
     void clearFile(String FileName);
 }
