@@ -17,12 +17,24 @@ public class SSManager<K extends Comparable<K>, V> implements ISSManager<K, V> {
     public SSManager(SSTableNameGenerator nameGenerator, SsService service) {
         this.nameGenerator = nameGenerator;
         this.service = service;
-        tables=new ArrayList<>();
+        tables = new ArrayList<>();
+        var fileNames = service.getFilesNameWithPrefix("SSTable");
+        for(var file: fileNames)
+        {
+            var mapper = service.<K, V>restoreSSMap(file);
+            var table = new SSTable<K>(file, mapper);
+            this.tables.add(table);
+        }
+
     }
 
     @Override
     public SSTable<K> createTable(ArrayList<KVPair<K, V>> pairs) throws IOException {
-        var fileName = nameGenerator.getName(tables.size() + 1);
+        var fileName = nameGenerator.getName();
+        return createTable(pairs, fileName);
+    }
+
+    private SSTable<K> createTable(ArrayList<KVPair<K, V>> pairs, String fileName) throws IOException {
         var newTable = new SSTable<K>(fileName);
         newTable.setMapper(service.set(pairs, fileName));
         tables.add(newTable);
@@ -43,15 +55,16 @@ public class SSManager<K extends Comparable<K>, V> implements ISSManager<K, V> {
 
     @Override
     public void merge() throws IOException {
-        var arrays = new ArrayList<ArrayList<KVPair<K,V>>>();
-        for (var table: tables)
-        {
+        var arrays = new ArrayList<ArrayList<KVPair<K, V>>>();
+        for (var table : tables) {
             arrays.add(service.getAll(table.getFileName()));
         }
-        var newArray = mergeArrays(arrays);
-        var newTable = createTable(newArray);
-        clear();
-        tables.add(newTable);
+        if (arrays.size() != 0) {
+            var newArray = mergeArrays(arrays);
+            clear();
+            var newTable = createTable(newArray);
+            tables.add(newTable);
+        }
     }
 
     private ArrayList<KVPair<K, V>> mergeArrays(ArrayList<ArrayList<KVPair<K, V>>> arrays) {
@@ -64,9 +77,9 @@ public class SSManager<K extends Comparable<K>, V> implements ISSManager<K, V> {
         var currentMaxArrayNumber = -1;
         while (!queue.isEmpty()) {
             var min = queue.remove();
-            if (resultList.get(resultList.size() - 1).equals(min.getPair())) {
-                if (currentMaxArrayNumber < min.getArrayNumber())
-                {
+
+            if (!resultList.isEmpty() && resultList.get(resultList.size() - 1).equals(min.getPair())) {
+                if (currentMaxArrayNumber < min.getArrayNumber()) {
                     resultList.set(resultList.size() - 1, min.getPair());
                     currentMaxArrayNumber = min.getArrayNumber();
                 }
@@ -83,10 +96,8 @@ public class SSManager<K extends Comparable<K>, V> implements ISSManager<K, V> {
         return resultList;
     }
 
-    private void clear()
-    {
-        for(var table:tables)
-        {
+    private void clear() {
+        for (var table : tables) {
             service.clear(table.getFileName());
         }
         tables.clear();

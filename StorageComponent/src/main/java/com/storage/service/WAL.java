@@ -25,6 +25,9 @@ public class WAL implements IWal {
     public <K extends Comparable<K>, V> ArrayList<KVPair<K, V>> getAll() throws IOException {
         ArrayList<KVPair<K, V>> list = new ArrayList<>();
         String line = fs.read(fileName);
+        if (line.isEmpty()) {
+            return list;
+        }
         String[] pairs = line.split(pairEnd);
         for (String pair : pairs) {
             String[] values = pair.split(pairSep);
