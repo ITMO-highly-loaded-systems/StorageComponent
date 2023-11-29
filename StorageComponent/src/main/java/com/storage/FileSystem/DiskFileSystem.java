@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.*;
+import java.util.ArrayList;
 
 @Getter
 @AllArgsConstructor
@@ -31,7 +32,7 @@ public class DiskFileSystem implements FileSystem {
         byte[] compressedData = compressor.compress(str);
         FileOutputStream fos = new FileOutputStream(file, true);
         int size = compressedData.length;
-        str = "0".repeat(bitCount-Integer.toString(size).length()) + size;
+        str = "0".repeat(bitCount - Integer.toString(size).length()) + size;
         fos.write(str.getBytes());
         fos.write(compressedData);
         fos.close();
@@ -62,9 +63,9 @@ public class DiskFileSystem implements FileSystem {
     }
 
     @Override
-    public int readSegmentSize(int off, int bitCount, String fileName) throws IOException{
+    public int readSegmentSize(int off, int bitCount, String fileName) throws IOException {
         File file = new File(directory, fileName);
-        if(file.length() <= off) {
+        if (file.length() <= off) {
             return 0;
         }
         FileInputStream fis = new FileInputStream(file);
@@ -77,7 +78,7 @@ public class DiskFileSystem implements FileSystem {
     }
 
     @Override
-    public void clearFile(String fileName){
+    public void clearFile(String fileName) {
         File file = new File(directory, fileName);
         FileWriter writer = null;
         try {
@@ -88,5 +89,26 @@ public class DiskFileSystem implements FileSystem {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void deleteFile(String fileName) {
+        File file = new File(directory, fileName);
+        file.delete();
+    }
+
+    @Override
+    public ArrayList<File> GetFilesForPathByPrefix(String prefix) {
+        var allFiles = directory.listFiles();
+        var files = new ArrayList<File>();
+        if (allFiles != null) {
+            for (File f : allFiles) {
+                var name = f.getName();
+                if (name.startsWith(prefix)) {
+                    files.add(f);
+                }
+            }
+        }
+        return files;
     }
 }

@@ -9,6 +9,10 @@ public class SSTable<K extends Comparable<K>> {
         this.fileName = paths;
     }
 
+    public SSTable(String paths, ArrayList<SSMap<K>> mapper) {
+        this.fileName = paths;
+        this.mapper = mapper;
+    }
     private final String fileName;
     //    private HashMap<K, SSSegmentInfo> mapper;
     private ArrayList<SSMap<K>> mapper;

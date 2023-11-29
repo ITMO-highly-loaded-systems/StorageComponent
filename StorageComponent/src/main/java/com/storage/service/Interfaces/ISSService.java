@@ -18,4 +18,6 @@ public interface ISSService {
     <K extends Comparable<K>,V> ArrayList<SSMap<K>> restoreSSMap(String fileName);
 
     void clear(String fileName);
+
+    <K extends Comparable<K>, V> ArrayList<String> getFilesNameWithPrefix(String prefix);
 }

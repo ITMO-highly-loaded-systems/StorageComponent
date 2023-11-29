@@ -1,5 +1,7 @@
 package com.storage.FileSystem;
 import java.io.*;
+import java.util.ArrayList;
+
 import com.storage.SS.SSSegmentInfo;
 
 public interface FileSystem {
@@ -14,4 +16,8 @@ public interface FileSystem {
     int readSegmentSize(int off, int bitCount, String FileName) throws IOException;
 
     void clearFile(String FileName);
+
+    public void deleteFile(String fileName);
+
+    ArrayList<File> GetFilesForPathByPrefix(String prefix);
 }
